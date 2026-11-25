@@ -7,22 +7,9 @@
 #include <stdio.h>
 #include <fcntl.h>
 #include <sys/mman.h>
-
-typedef enum
-{
-	SUCCESS = 0,
-	CREATION_ERROR = 1,
-	FILE_FAILURE_ERROR = 2,
-} ARENAError;
-
-typedef struct sArena
-{
-	uint8_t *start;
-	size_t size;
-	size_t offset;
-} tArena;
-
-tArena *arena_create(size_t size, size_t offset);
+#include <sys/stat.h>
+#include <stdbool.h>
+// tArena *arena_create(size_t size, size_t alignment, const char *file_path, tAlocationBackend allocation);
 
 /* thread-local error state */
 #if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 201112L
@@ -60,67 +47,7 @@ static uint8_t *get_err(void)
 
 #define _ARENAERROR (get_error())
 #define ARENAERROR (*_ARENAERROR)
-fopen
 
-tArena *arena_create(size_t size, size_t offset, size_t alignment, const char *file_path)
-{
-	ARENAERROR = SUCCESS;
-	if (size % alignment != 0 || offset % alignment != 0)
-		dprintf(1, "WARNING: size or offset of creating arena is not aligned to %zu.\n", alignment);
-	tArena *arena = malloc(sizeof(tArena));
-	if (!arena)
-	{
-		ARENAERROR = CREATION_ERROR;
-		return NULL;
-	}
-	if (!file_path)
-	{
-#if defined(MMAP_ALLOC)
-		void *pages = mmap(
-				NULL, size, PROT_READ | PROT_WRITE,
-				MAP_HUGETLB | MAP_HUGE_2MB
-				);
-		if ((int)pages == -1)
-		{
-			ARENAERROR = CREATION_ERROR;
-			return NULL;
-		}
-#elif defined(ALIGNED_ALLOC)
-		void *pages = aligned_alloc(alignment, size);
-		if (!pages)
-		{
-			ARENAERROR = CREATION_ERROR;
-			return NULL;
-		}
-#else // defalut using malloc
-		void *pages = malloc(size);
-		if (!pages)
-		{
-			ARENAERROR = CREATION_ERROR;
-			return NULL;
-		}
-#endif
-	}
-	else
-	{
-#define MMAP_ALLOC
-		int fd = open(file_path, O_RDONLY);
-		if (fd == -1)
-		{
-			ARENAERROR = FILE_FAILURE_ERROR:
-			return NULL;
-		}
-		void *pages = mmap(
-				NULL, size, PROT_READ | PROT_WRITE,
-				MAP_HUGETLB | MAP_HUGE_2MB | MAP_FILE, fd, 0
-				);
-		if ((int)pages == -1)
-		{
-			ARENAERROR = CREATION_ERROR;
-			return NULL;
-		}
-	}
-}
 
 #endif
 #endif

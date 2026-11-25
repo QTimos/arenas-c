@@ -25,7 +25,7 @@ int main(int argc, char **argv)
 			NULL, s.st_size, PROT_READ,
 			MAP_PRIVATE, fd, 0
 		);
-	if ((int) buf == -1)
+	if ((long) buf == -1)
 	{
 		perror("ERROR");
 		return 1;
@@ -41,7 +41,7 @@ int main(int argc, char **argv)
 			MAP_PRIVATE | MAP_HUGE_2MB | MAP_ANON,
 			-1, 0
 			);
-	if ((int) mal == -1)
+	if ((long) mal == -1)
 	{
 		perror("ERROR");
 		return 1;
